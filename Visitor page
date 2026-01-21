@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Visitor Log — Touch Friendly</title>
+
+  <!-- Styling for a portrait-first, touch-friendly layout that scales up to 1080x1920 -->
+  <style>
+    :root{
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --accent: #0b84ff;
+      --accent-contrast: #fff;
+      --muted: #6b7280;
+      --radius: 14px;
+      --gap: 18px;
+      --input-height: 64px;
+      --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: var(--font-sans);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 100%);
+      color:#111827;
+    }
+
+    /* Stage centers a portrait "frame" that will not exceed 1080x1920 */
+    .stage{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      box-sizing:border-box;
+    }
+
+    /* Frame keeps a 9:16 portrait aspect ratio, scales with viewport, and caps at 1080x1920 */
+    .frame{
+      width: min(94vw, 1080px);
+      aspect-ratio: 9 / 16; /* width / height = 9:16 -> portrait */
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 30px rgba(2,6,23,0.12);
+      padding: clamp(18px, 3.5vw, 36px);
+      box-sizing:border-box;
+      display:flex;
+      flex-direction:column;
+      gap: var(--gap);
+      overflow: hidden;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .brand {
+      width:56px;
+      height:56px;
+      border-radius:10px;
+      background: linear-gradient(135deg,var(--accent),#7dd3fc);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--accent-contrast);
+      font-weight:700;
+      font-size:20px;
+      box-shadow: 0 6px 18px rgba(11,132,255,0.18);
+      flex-shrink:0;
+    }
+    h1{
+      font-size: clamp(18px, 3.5vw, 26px);
+      margin:0;
+      line-height:1.05;
+    }
+    p.subtitle{
+      margin:0;
+      color:var(--muted);
+      font-size: clamp(12px, 2.6vw, 15px);
+    }
+
+    form.main{
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+      flex:1 1 auto;
+      overflow:auto;
+      padding-right:6px; /* allow space for scrollbar */
+    }
+
+    label.field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      font-size:14px;
+    }
+
+    input[type="text"], input[type="search"] {
+      height: var(--input-height);
+      padding: 12px 18px;
+      font-size:18px;
+      border-radius:12px;
+      border:1px solid #e6e9ee;
+      background: linear-gradient(180deg, #fff, #fbfdff);
+      box-shadow: 0 4px 12px rgba(2,6,23,0.04) inset;
+      outline: none;
+      transition: box-shadow .12s ease, border-color .12s ease, transform .06s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    input[type="text"]:focus{
+      border-color: rgba(11,132,255,0.9);
+      box-shadow: 0 8px 20px rgba(11,132,255,0.10);
+      transform: translateY(-1px);
+    }
+
+    .actions{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:6px;
+    }
+
+    button.primary{
+      background:var(--accent);
+      color:var(--accent-contrast);
+      border: none;
+      border-radius: 12px;
+      padding:14px 18px;
+      font-size:18px;
+      font-weight:600;
+      box-shadow: 0 8px 20px rgba(11,132,255,0.18);
+      cursor:pointer;
+      flex: 1 1 auto;
+      min-height:56px;
+    }
+
+    button.ghost{
+      background: transparent;
+      color: #111827;
+      border: 1px solid #e6e9ee;
+      border-radius: 12px;
+      padding:12px 14px;
+      font-size:16px;
+      cursor:pointer;
+      min-width:120px;
+    }
+
+    .status{
+      font-size:13px;
+      color:var(--muted);
+      text-align:center;
+      padding:6px 0;
+    }
+
+    /* small footer row */
+    footer{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* simple modal/notification */
+    .toast{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:24px;
+      background:#0b84ff;
+      color:white;
+      padding:12px 18px;
+      border-radius:10px;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.18);
+      display:none;
+      z-index:999;
+    }
+    .toast.show{ display:block; }
+
+    /* Larger tap areas on mobile */
+    @media (hover: none) and (pointer: coarse) {
+      button.primary{ padding:18px; font-size:20px; }
+      input[type="text"]{ font-size:20px; height:72px; padding:14px; }
+    }
+
+    /* If the device is landscape, show subtle hint to rotate device (since app is portrait-first) */
+    @media (orientation: landscape) {
+      .rotate-hint{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:10px;
+        padding:8px;
+        border-radius:10px;
+        background: #fff7ed;
+        color:#92400e;
+        font-size:13px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="frame" role="application" aria-label="Visitor log form">
+      <header>
+        <div class="brand" aria-hidden="true">VL</div>
+        <div>
+          <h1>Visitor Log</h1>
+          <p class="subtitle">Please sign in — touch-friendly and portrait-first</p>
+        </div>
+      </header>
+
+      <form class="main" id="visitorForm" autocomplete="on" novalidate>
+        <label class="field" for="firstName">
+          <span>First name</span>
+          <input id="firstName" name="firstName" type="text" inputmode="text" enterkeyhint="next"
+                 autocomplete="given-name" placeholder="John" required aria-required="true" />
+        </label>
+
+        <label class="field" for="lastName">
+          <span>Last name</span>
+          <input id="lastName" name="lastName" type="text" inputmode="text" enterkeyhint="next"
+                 autocomplete="family-name" placeholder="Doe" required aria-required="true" />
+        </label>
+
+        <label class="field" for="company">
+          <span>Company</span>
+          <input id="company" name="company" type="text" inputmode="text" enterkeyhint="done"
+                 autocomplete="organization" placeholder="Acme Corp" required aria-required="true" />
+        </label>
+
+        <div class="actions" style="margin-top:6px;">
+          <button type="submit" class="primary" id="submitBtn" aria-label="Sign in">Sign in</button>
+          <button type="button" class="ghost" id="kioskBtn" aria-label="Enter kiosk mode">Kiosk Mode</button>
+        </div>
+
+        <div class="status" id="statusLine" aria-live="polite"></div>
+
+      </form>
+
+      <footer>
+        <div style="display:flex;gap:8px;">
+          <button class="ghost" id="viewBtn" title="View saved entries">View log</button>
+          <button class="ghost" id="exportBtn" title="Export as CSV">Export CSV</button>
+        </div>
+        <div style="font-size:12px;color:var(--muted)">v1.0</div>
+      </footer>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Saved</div>
+
+  <!-- Small embedded script to save to localStorage and handle UI -->
+  <script>
+    (function(){
+      const form = document.getElementById('visitorForm');
+      const toast = document.getElementById('toast');
+      const statusLine = document.getElementById('statusLine');
+      const submitBtn = document.getElementById('submitBtn');
+      const kioskBtn = document.getElementById('kioskBtn');
+      const viewBtn = document.getElementById('viewBtn');
+      const exportBtn = document.getElementById('exportBtn');
+
+      const STORAGE_KEY = 'visitor_log_entries_v1';
+
+      function nowISO(){
+        return new Date().toISOString();
+      }
+
+      function loadEntries(){
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch(e){
+          console.error(e);
+          return [];
+        }
+      }
+
+      function saveEntries(arr){
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+      }
+
+      function pushEntry(entry){
+        const entries = loadEntries();
+        entries.push(entry);
+        saveEntries(entries);
+        updateStatus();
+      }
+
+      function updateStatus(){
+        const count = loadEntries().length;
+        statusLine.textContent = count === 0 ? 'No entries yet' : count + ' saved entr' + (count === 1 ? 'y' : 'ies');
+      }
+
+      function showToast(msg='Saved'){
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(()=>toast.classList.remove('show'), 1800);
+      }
+
+      form.addEventListener('submit', function(ev){
+        ev.preventDefault();
+        submitBtn.disabled = true;
+        const first = form.firstName.value.trim();
+        const last = form.lastName.value.trim();
+        const company = form.company.value.trim();
+
+        if(!first || !last || !company){
+          showToast('Fill all fields');
+          submitBtn.disabled = false;
+          return;
+        }
+
+        const entry = {
+          firstName: first,
+          lastName: last,
+          company: company,
+          createdAt: nowISO()
+        };
+
+        pushEntry(entry);
+        showToast('Saved');
+        form.reset();
+        form.firstName.focus();
+        submitBtn.disabled = false;
+      });
+
+      // View log in a simple modal-like window (new tab)
+      viewBtn.addEventListener('click', function(){
+        const entries = loadEntries();
+        const rows = entries.map(e => {
+          return [e.createdAt, e.firstName, e.lastName, e.company].map(v => String(v).replaceAll('"','""'));
+        });
+        const html = `
+          <html>
+            <head>
+              <title>Visitor Log - ${entries.length} entries</title>
+              <meta name="viewport" content="width=device-width,initial-scale=1" />
+              <style>body{font-family:system-ui;padding:18px;background:#f7f9fc}table{border-collapse:collapse;width:100%}td,th{padding:10px;border:1px solid #e6e9ee;text-align:left}</style>
+            </head>
+            <body>
+              <h2>Visitor Log (${entries.length})</h2>
+              <table>
+                <thead><tr><th>When (ISO)</th><th>First</th><th>Last</th><th>Company</th></tr></thead>
+                <tbody>
+                  ${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}
+                </tbody>
+              </table>
+            </body>
+          </html>
+        `;
+        const w = window.open('', '_blank');
+        if(w){
+          w.document.write(html);
+          w.document.close();
+        } else {
+          alert('Popup blocked. Allow popups to view the log.');
+        }
+      });
+
+      // Export CSV
+      exportBtn.addEventListener('click', function(){
+        const entries = loadEntries();
+        if(entries.length === 0){ showToast('No entries'); return; }
+        const header = ['createdAt','firstName','lastName','company'];
+        const csv = [
+          header.join(','),
+          ...entries.map(e => header.map(h => JSON.stringify(e[h] || '')).join(','))
+        ].join('\n');
+
+        const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'visitor_log.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+
+      // Try to enter fullscreen + lock orientation to portrait if supported.
+      kioskBtn.addEventListener('click', async function(){
+        // request fullscreen
+        try {
+          if (document.fullscreenElement == null && document.documentElement.requestFullscreen) {
+            await document.documentElement.requestFullscreen({navigationUI: "hide"});
+          }
+        } catch(err){
+          console.warn('Couldn't enter fullscreen:', err);
+        }
+
+        // try to lock orientation
+        try {
+          if (screen.orientation && screen.orientation.lock) {
+            await screen.orientation.lock('portrait').catch(()=>{});
+          } else if (screen.lockOrientationUniversal) {
+            // older vendor prefixed APIs (rare)
+            screen.lockOrientationUniversal('portrait');
+          }
+        } catch(err){
+          // ignore
+        }
+      });
+
+      // Initialization
+      updateStatus();
+
+      // Friendly focus behavior: focus first field on load for quick entry
+      window.addEventListener('load', function(){
+        setTimeout(()=> {
+          const el = document.getElementById('firstName');
+          if(el) el.focus();
+        }, 200);
+      });
+    })();
+  </script>
+</body>
+</html>
