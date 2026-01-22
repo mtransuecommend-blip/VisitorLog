@@ -2,113 +2,152 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Visitor Log</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Visitor Sign-In</title>
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         :root {
-            --primary: #2563eb;
-            --bg: #f1f5f9;
-            --text: #0f172a;
+            --bg-color: #f0f2f5;
+            --brand-blue: #0052cc;
+            --input-bg: #ffffff;
         }
 
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+        body, html {
+            height: 100%;
+            width: 100%;
+            overflow: hidden; /* Prevents stray scrolling on kiosks */
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+        }
+
+        /* Main Wrapper - Force full screen */
+        .wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
+            height: 100vh;
+            width: 100vw;
             padding: 20px;
         }
 
-        .card {
+        .visitor-card {
             background: white;
             width: 100%;
             max-width: 500px;
-            padding: 2rem;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
 
-        h1 { margin-top: 0; font-size: 1.5rem; text-align: center; }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #1a1a1a;
+        }
 
-        .field { margin-bottom: 1.5rem; }
+        .input-group {
+            text-align: left;
+            margin-bottom: 1.5rem;
+        }
 
         label {
             display: block;
-            margin-bottom: 8px;
             font-weight: 600;
-            font-size: 0.9rem;
-            color: #64748b;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-size: 1.1rem;
         }
 
         input {
             width: 100%;
-            padding: 16px; /* Touch friendly size */
-            font-size: 1.1rem; /* Prevents auto-zoom on mobile */
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            box-sizing: border-box;
+            height: 60px; /* Large touch target */
+            padding: 0 15px;
+            font-size: 1.2rem;
+            border: 2px solid #cbd5e0;
+            border-radius: 12px;
             outline: none;
+            transition: border-color 0.2s;
+            -webkit-appearance: none; /* Removes iOS inner shadows */
         }
 
-        input:focus { border-color: var(--primary); }
+        input:focus {
+            border-color: var(--brand-blue);
+        }
 
-        button {
+        .submit-btn {
             width: 100%;
-            background: var(--primary);
+            height: 65px;
+            background-color: var(--brand-blue);
             color: white;
             border: none;
-            padding: 18px;
-            border-radius: 10px;
-            font-size: 1.1rem;
+            border-radius: 12px;
+            font-size: 1.3rem;
             font-weight: 700;
+            margin-top: 1rem;
             cursor: pointer;
-            transition: opacity 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 82, 204, 0.2);
         }
 
-        button:active { opacity: 0.8; transform: scale(0.99); }
+        .submit-btn:active {
+            transform: translateY(2px);
+            filter: brightness(0.9);
+        }
 
-        /* Auto-scale for Landscape */
-        @media (orientation: landscape) and (max-height: 500px) {
-            body { padding: 10px; }
-            .card { padding: 1rem; }
-            .field { margin-bottom: 0.8rem; }
+        /* Portrait Specific scaling */
+        @media (orientation: portrait) {
+            .visitor-card {
+                max-width: 95%;
+                padding: 2rem 1.5rem;
+            }
+            h1 { font-size: 1.7rem; }
+        }
+
+        /* Landscape Specific adjustments for short screens */
+        @media (orientation: landscape) and (max-height: 600px) {
+            .wrapper { align-items: flex-start; overflow-y: auto; }
+            .visitor-card { margin-top: 10px; padding: 1.5rem; }
+            h1 { margin-bottom: 1rem; font-size: 1.5rem; }
+            .input-group { margin-bottom: 1rem; }
+            input { height: 50px; }
         }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h1>Visitor Sign-In</h1>
-    <form id="visitorForm">
-        <div class="field">
-            <label for="fname">First Name</label>
-            <input type="text" id="fname" required placeholder="John">
-        </div>
-        <div class="field">
-            <label for="lname">Last Name</label>
-            <input type="text" id="lname" required placeholder="Doe">
-        </div>
-        <div class="field">
-            <label for="company">Company</label>
-            <input type="text" id="company" required placeholder="Acme Corp">
-        </div>
-        <button type="submit">Sign In</button>
-    </form>
+<div class="wrapper">
+    <div class="visitor-card">
+        <h1>Welcome</h1>
+        <form id="vLog">
+            <div class="input-group">
+                <label for="fname">First Name</label>
+                <input type="text" id="fname" required autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label for="lname">Last Name</label>
+                <input type="text" id="lname" required autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label for="comp">Company</label>
+                <input type="text" id="comp" required autocomplete="off">
+            </div>
+            <button type="submit" class="submit-btn">Check In</button>
+        </form>
+    </div>
 </div>
 
 <script>
-    document.getElementById('visitorForm').onsubmit = function(e) {
+    document.getElementById('vLog').onsubmit = function(e) {
         e.preventDefault();
-        const data = {
-            name: document.getElementById('fname').value + ' ' + document.getElementById('lname').value,
-            company: document.getElementById('company').value,
-            time: new Date().toLocaleTimeString()
-        };
-        alert('Welcome, ' + data.name + ' from ' + data.company + '!');
+        const f = document.getElementById('fname').value;
+        const l = document.getElementById('lname').value;
+        const c = document.getElementById('comp').value;
+        
+        // Log to console for debugging
+        console.log(`Entry: ${f} ${l}, ${c}`);
+        
+        alert(`Welcome, ${f}! You have been signed in.`);
         this.reset();
     };
 </script>
