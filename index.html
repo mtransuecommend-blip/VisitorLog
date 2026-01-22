@@ -2,155 +2,120 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Visitor Sign-In</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Visitor Log</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-            --bg-color: #f0f2f5;
-            --brand-blue: #0052cc;
-            --input-bg: #ffffff;
-        }
-
-        body, html {
-            height: 100%;
-            width: 100%;
-            overflow: hidden; /* Prevents stray scrolling on kiosks */
-            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-        }
-
-        /* Main Wrapper - Force full screen */
-        .wrapper {
+        /* Force high contrast and prevent text-size-adjust issues */
+        html { -webkit-text-size-adjust: 100%; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5 !important; /* Light Grey Background */
+            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            width: 100vw;
-            padding: 20px;
+            min-height: 100vh;
         }
 
-        .visitor-card {
-            background: white;
-            width: 100%;
-            max-width: 500px;
-            padding: 3rem 2rem;
-            border-radius: 20px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            text-align: center;
+        .container {
+            background-color: #ffffff !important; /* White Card */
+            width: 90%;
+            max-width: 450px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            border: 1px solid #ddd;
         }
 
+        /* Explicitly styling the Title */
         h1 {
-            font-size: 2rem;
-            margin-bottom: 2rem;
-            color: #1a1a1a;
+            color: #1a1a1a !important; /* Dark Black/Grey */
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 28px;
+            display: block !important;
         }
 
-        .input-group {
-            text-align: left;
-            margin-bottom: 1.5rem;
+        .input-wrapper {
+            margin-bottom: 20px;
         }
 
+        /* Explicitly styling the Labels */
         label {
-            display: block;
-            font-weight: 600;
+            display: block !important;
+            color: #333333 !important; /* Solid Dark Grey */
+            font-weight: bold;
+            font-size: 18px;
             margin-bottom: 8px;
-            color: #4a5568;
-            font-size: 1.1rem;
+            text-align: left;
         }
 
         input {
             width: 100%;
-            height: 60px; /* Large touch target */
-            padding: 0 15px;
-            font-size: 1.2rem;
-            border: 2px solid #cbd5e0;
-            border-radius: 12px;
-            outline: none;
-            transition: border-color 0.2s;
-            -webkit-appearance: none; /* Removes iOS inner shadows */
+            height: 55px;
+            font-size: 20px;
+            padding: 10px;
+            border: 2px solid #333; /* Darker border for visibility */
+            border-radius: 8px;
+            box-sizing: border-box;
+            background-color: #fff !important;
+            color: #000 !important;
         }
 
-        input:focus {
-            border-color: var(--brand-blue);
-        }
-
-        .submit-btn {
+        button {
             width: 100%;
             height: 65px;
-            background-color: var(--brand-blue);
-            color: white;
+            background-color: #0052cc;
+            color: #ffffff !important;
+            font-size: 22px;
+            font-weight: bold;
             border: none;
-            border-radius: 12px;
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-top: 1rem;
+            border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 82, 204, 0.2);
+            margin-top: 10px;
         }
 
-        .submit-btn:active {
-            transform: translateY(2px);
-            filter: brightness(0.9);
-        }
-
-        /* Portrait Specific scaling */
-        @media (orientation: portrait) {
-            .visitor-card {
-                max-width: 95%;
-                padding: 2rem 1.5rem;
-            }
-            h1 { font-size: 1.7rem; }
-        }
-
-        /* Landscape Specific adjustments for short screens */
-        @media (orientation: landscape) and (max-height: 600px) {
-            .wrapper { align-items: flex-start; overflow-y: auto; }
-            .visitor-card { margin-top: 10px; padding: 1.5rem; }
-            h1 { margin-bottom: 1rem; font-size: 1.5rem; }
-            .input-group { margin-bottom: 1rem; }
-            input { height: 50px; }
+        /* Auto-scale for Portrait vs Landscape */
+        @media (orientation: landscape) {
+            body { align-items: flex-start; padding-top: 20px; }
+            .container { max-width: 600px; }
         }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-    <div class="visitor-card">
-        <h1>Welcome</h1>
-        <form id="vLog">
-            <div class="input-group">
-                <label for="fname">First Name</label>
-                <input type="text" id="fname" required autocomplete="off">
+    <div class="container">
+        <h1>Visitor Sign-In</h1>
+        
+        <form id="logForm">
+            <div class="input-wrapper">
+                <label for="f">First Name</label>
+                <input type="text" id="f" required>
             </div>
-            <div class="input-group">
-                <label for="lname">Last Name</label>
-                <input type="text" id="lname" required autocomplete="off">
+
+            <div class="input-wrapper">
+                <label for="l">Last Name</label>
+                <input type="text" id="l" required>
             </div>
-            <div class="input-group">
-                <label for="comp">Company</label>
-                <input type="text" id="comp" required autocomplete="off">
+
+            <div class="input-wrapper">
+                <label for="c">Company Name</label>
+                <input type="text" id="c" required>
             </div>
-            <button type="submit" class="submit-btn">Check In</button>
+
+            <button type="submit">Complete Sign-In</button>
         </form>
     </div>
-</div>
 
-<script>
-    document.getElementById('vLog').onsubmit = function(e) {
-        e.preventDefault();
-        const f = document.getElementById('fname').value;
-        const l = document.getElementById('lname').value;
-        const c = document.getElementById('comp').value;
-        
-        // Log to console for debugging
-        console.log(`Entry: ${f} ${l}, ${c}`);
-        
-        alert(`Welcome, ${f}! You have been signed in.`);
-        this.reset();
-    };
-</script>
+    <script>
+        document.getElementById('logForm').onsubmit = function(e) {
+            e.preventDefault();
+            alert('Success! Thank you for signing in.');
+            this.reset();
+        };
+    </script>
 
 </body>
 </html>
